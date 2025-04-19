@@ -365,9 +365,11 @@ public final class TextUtil
                         .replace("'", "&#39;"); //$NON-NLS-1$ //$NON-NLS-2$ Ï
     }
     
+ 
     /**
      * Determines if a search text matches a numeric value.
-     * Supports partial matches (prefixes), locale-specific formatting, and handles negative numbers.
+     * Supports partial matches (prefixes), locale-specific formatting, and handles both
+     * positive and negative numbers regardless of search sign (as they're displayed in different columns).
      * 
      * @param searchText The text to search for
      * @param value The numeric value to match against
@@ -391,21 +393,13 @@ public final class TextUtil
             return false;
         }
         
-        // Check sign consistency
-        boolean searchIsNegative = cleanedSearchText.startsWith("-");
-        boolean valueIsNegative = value < 0;
-        
-        if (searchIsNegative != valueIsNegative) {
-            return false; // Signs don't match
-        }
-        
-        // Format the value to a string using the current locale
+        // Format the value to a string using the current locale (using absolute value)
         DecimalFormat df = new DecimalFormat("#.###");
         df.setGroupingUsed(false); // Disable grouping
-        String formattedValue = df.format(Math.abs(value)); // Remove sign for comparison
+        String formattedValue = df.format(Math.abs(value)); // Always use absolute value for comparison
         
-        // Remove sign from search text for comparison
-        if (searchIsNegative) {
+        // Remove any negative sign from search text for comparison
+        if (cleanedSearchText.startsWith("-")) {
             cleanedSearchText = cleanedSearchText.substring(1);
         }
         
@@ -432,7 +426,7 @@ public final class TextUtil
             return false;
         }
         
-        // Handle the failing test case: assertFalse(TextUtil.isNumericMatch("25.0", 2500));
+        // Handle case: assertFalse(TextUtil.isNumericMatch("25.0", 2500));
         // If search has decimal but whole parts have different lengths (e.g., "25.0" vs "2500")
         if (searchHasDecimal && searchWholePart.length() != valueWholePart.length()) {
             return false;
