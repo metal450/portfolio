@@ -389,15 +389,11 @@ public final class TextUtil
         // value)
         DecimalFormat df = new DecimalFormat("#.###");
         df.setGroupingUsed(false); // Disable grouping
-        String formattedValue = df.format(Math.abs(value)); // Always use
-                                                            // absolute value
-                                                            // for comparison
+        String formattedValue = df.format(Math.abs(value));
 
         // Remove any negative sign from search text for comparison
         if (cleanedSearchText.startsWith("-"))
-        {
             cleanedSearchText = cleanedSearchText.substring(1);
-        }
 
         // Split both strings into whole and decimal parts
         boolean searchHasDecimal = cleanedSearchText.contains(String.valueOf(decimalSeparator));
