@@ -17,6 +17,7 @@ import name.abuchen.portfolio.model.AccountTransaction;
 import name.abuchen.portfolio.model.PortfolioTransaction;
 import name.abuchen.portfolio.model.Security;
 import name.abuchen.portfolio.model.TransactionPair;
+import name.abuchen.portfolio.money.Money;
 import name.abuchen.portfolio.ui.Messages;
 
 public class TransactionSearchField extends ControlContribution
@@ -99,12 +100,54 @@ public class TransactionSearchField extends ControlContribution
                 for (Function<TransactionPair<?>, Object> label : searchLabels)
                 {
                     Object l = label.apply(tx);
-                    if (l != null && l.toString().toLowerCase().indexOf(filterText) >= 0)
+                    if (l == null)
+                        continue;
+
+                    // If we the searched text is purely numeric, and we're
+                    // looking at a numeric field,
+                    // compare by value rather than by string. This ensures that
+                    // results will be turned
+                    // regardless of searching by i.e. "1,000" or "1000"
+                    Double numericSearch = tryParseAsNumber(filterText);
+                    if (numericSearch != null && (l instanceof Money || l instanceof Number))
+                    {
+                        double fieldValue;
+                        if (l instanceof Money)
+                            fieldValue = ((Money) l).getAmount() / 100.0;
+                        else if (l instanceof Long)
+                            fieldValue = ((Long) l).doubleValue() / 100000000.0;
+                        else
+                            fieldValue = ((Number) l).doubleValue();
+
+                        String fieldValueStr = String.valueOf(fieldValue).replace(".0", "");
+                        String searchValueStr = String.valueOf(numericSearch).replace(".0", "");
+                        if (fieldValueStr.contains(searchValueStr))
+                            return true;
+                    }
+                    // Otherwise use string-based search (existing behavior)
+                    else if (l.toString().toLowerCase().indexOf(filterText) >= 0)
                         return true;
                 }
 
                 return false;
             }
         };
+    }
+
+    /**
+     * Try to parse the search text as a number, removing commas and other
+     * formatting characters. Returns null if the text isn't a number.
+     */
+    private Double tryParseAsNumber(String text)
+    {
+        try
+        {
+            String cleaned = text.replace(",", "").replace(" ", "");
+            return Double.parseDouble(cleaned);
+        }
+        catch (NumberFormatException e)
+        {
+            return null;
+        }
     }
 }
