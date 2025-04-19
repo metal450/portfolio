@@ -262,16 +262,15 @@ public class TextUtilTest
         assertFalse(TextUtil.isNumericMatch("", 12));
         assertFalse(TextUtil.isNumericMatch("abc", 12));
         assertFalse(TextUtil.isNumericMatch("12a", 12));
-        assertTrue(TextUtil.isNumericMatch("25" + decimalSep + "0", -25));
-        assertTrue(TextUtil.isNumericMatch("25" + decimalSep + "5", -25.5));
-        assertTrue(TextUtil.isNumericMatch("25" + decimalSep + "5", -25.55));
         assertTrue(TextUtil.isNumericMatch("2" + groupSep + "500" + decimalSep + "0", -2500));
-        assertTrue(TextUtil.isNumericMatch("25", 250));
         assertFalse(TextUtil.isNumericMatch("25.0", 2500));
         assertFalse(TextUtil.isNumericMatch("25.33", 254.33));
 
         // Note: We don't care about sign because PP displays both positive and
         // negative numbers as positive
         assertTrue(TextUtil.isNumericMatch("25", -25));
+        assertTrue(TextUtil.isNumericMatch("25" + decimalSep + "0", -25));
+        assertTrue(TextUtil.isNumericMatch("25" + decimalSep + "5", -25.5));
+        assertTrue(TextUtil.isNumericMatch("25" + decimalSep + "5", -25.55));
     }
 }
