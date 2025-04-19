@@ -366,17 +366,10 @@ public final class TextUtil
 
     /**
      * Determines if a search text matches a numeric value. Supports partial
-     * matches (prefixes), locale-specific formatting, and handles both positive
-     * and negative numbers regardless of search sign (as they're displayed in
-     * different columns).
-     * 
-     * @param searchText
-     *            The text to search for
-     * @param value
-     *            The numeric value to match against
-     * @return true if the search text matches the value, false otherwise
+     * matches (prefixes), locale-specific formatting, and separators
+     * (i.e. 2,000 = 2000)
      */
-    public static boolean isNumericMatch(String searchText, double value)
+    public static boolean isNumericSearchMatch(String searchText, double value)
     {
         // Handle empty or null search text
         if (searchText == null || searchText.isEmpty())

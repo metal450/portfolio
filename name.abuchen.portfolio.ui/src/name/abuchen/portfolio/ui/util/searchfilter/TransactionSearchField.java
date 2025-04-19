@@ -117,7 +117,7 @@ public class TransactionSearchField extends ControlContribution
                         else
                             fieldValue = ((Number) l).doubleValue();
 
-                        if (TextUtil.isNumericMatch(filterText, fieldValue))
+                        if (TextUtil.isNumericSearchMatch(filterText, fieldValue))
                             return true;
                     }
                 }
