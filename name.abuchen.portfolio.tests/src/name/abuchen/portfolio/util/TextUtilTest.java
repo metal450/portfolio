@@ -5,7 +5,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 import org.junit.Test;
 
@@ -200,4 +205,75 @@ public class TextUtilTest
         assertEquals(0, TextUtil.compare("abc", "abc"));
     }
 
+    @Test
+    public void testIsNumericMatch()
+    {
+        char decimalSeparator = new DecimalFormatSymbols(Locale.getDefault()).getDecimalSeparator();
+        String decimalSep = String.valueOf(decimalSeparator);
+        char groupingSeparator = new DecimalFormatSymbols(Locale.getDefault()).getGroupingSeparator();
+        String groupSep = String.valueOf(groupingSeparator);
+               
+        // Substring of whole number
+        assertTrue(TextUtil.isNumericMatch("2", 2601));
+        assertTrue(TextUtil.isNumericMatch("26", 2601));
+        assertTrue(TextUtil.isNumericMatch("260", 2601));
+        assertTrue(TextUtil.isNumericMatch("2601", 2601));
+        assertFalse(TextUtil.isNumericMatch("26010", 2601));
+        
+        // Substring of whole number with separators
+        assertTrue(TextUtil.isNumericMatch("2"+ groupSep +"6", 2601));
+        assertTrue(TextUtil.isNumericMatch("2"+ groupSep +"60", 2601));
+        assertTrue(TextUtil.isNumericMatch("2"+ groupSep +"601", 2601));
+        assertFalse(TextUtil.isNumericMatch("2"+ groupSep +"6010", 2601));
+        assertTrue(TextUtil.isNumericMatch("2"+ groupSep +"601" + decimalSep, 2601));
+        
+        // Substring of decimal
+        assertTrue(TextUtil.isNumericMatch("2", 2601.26));
+        assertTrue(TextUtil.isNumericMatch("26", 2601.26));
+        assertTrue(TextUtil.isNumericMatch("260", 2601.26));
+        assertTrue(TextUtil.isNumericMatch("2601", 2601.26));
+        assertTrue(TextUtil.isNumericMatch("2601" + decimalSep, 2601.26));
+        assertTrue(TextUtil.isNumericMatch("2601" + decimalSep + "2", 2601.26));
+        assertTrue(TextUtil.isNumericMatch("2601" + decimalSep + "26", 2601.26));
+        assertFalse(TextUtil.isNumericMatch("2601" + decimalSep + "261", 2601.26));
+        
+        // Substring of decimal with zeros
+        assertTrue(TextUtil.isNumericMatch("2601" + decimalSep, 2601));
+        assertTrue(TextUtil.isNumericMatch("2601" + decimalSep + "0", 2601));
+        assertTrue(TextUtil.isNumericMatch("2601" + decimalSep + "00", 2601));
+        assertFalse(TextUtil.isNumericMatch("2601" + decimalSep + "01", 2601));
+        
+        // Substring of decimal with separators
+        assertTrue(TextUtil.isNumericMatch("2"+ groupSep +"6", 2601.26));
+        assertTrue(TextUtil.isNumericMatch("2"+ groupSep +"60", 2601.26));
+        assertTrue(TextUtil.isNumericMatch("2"+ groupSep +"601", 2601.26));
+        assertTrue(TextUtil.isNumericMatch("2"+ groupSep +"601" + decimalSep, 2601.26));
+        assertTrue(TextUtil.isNumericMatch("2"+ groupSep +"601" + decimalSep + "2", 2601.26));
+        assertTrue(TextUtil.isNumericMatch("2"+ groupSep +"601" + decimalSep + "26", 2601.26));
+        assertFalse(TextUtil.isNumericMatch("2"+ groupSep +"601" + decimalSep + "261", 2601.26));
+       
+        // Substring in wrong position
+        assertFalse(TextUtil.isNumericMatch("25", 1250));
+        
+        // Zeros
+        assertTrue(TextUtil.isNumericMatch("0", 0));
+        assertFalse(TextUtil.isNumericMatch("0", 1));
+        assertTrue(TextUtil.isNumericMatch("0", 0.01)); // Substring
+        assertTrue(TextUtil.isNumericMatch("0" + decimalSep + "001", 0.001));
+        assertTrue(TextUtil.isNumericMatch("0" + decimalSep + "0", 0.0));
+        
+        // Other cases
+        assertFalse(TextUtil.isNumericMatch("", 12));
+        assertFalse(TextUtil.isNumericMatch("abc", 12));
+        assertFalse(TextUtil.isNumericMatch("12a", 12));
+        assertTrue(TextUtil.isNumericMatch("-25", -25));
+        assertTrue(TextUtil.isNumericMatch("-25" + decimalSep + "0", -25));
+        assertTrue(TextUtil.isNumericMatch("-25" + decimalSep + "5", -25.5));
+        assertTrue(TextUtil.isNumericMatch("-25" + decimalSep + "5", -25.55));
+        assertTrue(TextUtil.isNumericMatch("-2" + groupSep + "500" + decimalSep + "0", -2500));
+        assertTrue(TextUtil.isNumericMatch("-25", -250));
+        assertTrue(TextUtil.isNumericMatch(".25", 0.25));
+        assertTrue(TextUtil.isNumericMatch("0.25", 0.25));
+        assertFalse(TextUtil.isNumericMatch("-25", 25)); // Sign matters
+    }
 }
