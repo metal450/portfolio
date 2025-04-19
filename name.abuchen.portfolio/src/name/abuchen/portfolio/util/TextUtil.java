@@ -367,76 +367,90 @@ public final class TextUtil
     
     /**
      * Determines if the user-entered searchText matches the value,
-     * where: It should match substring (i.e. "25" should match "2500")
-     * If the user explicitly types i.e. "25.0", it should NOT match
-     * "25" If the user types i.e. "2,500", it should match "2500" It
+     * where: It should match substring (i.e. "25" should match "2500").
+     * If the user types i.e. "2,500", it should match "2500." It
      * must be locale-safe (decimal separators/delimiters are based on
      * locale)
      */
     public static boolean isNumericMatch(String searchText, double value)
     {
-        Locale locale = Locale.getDefault();
-
-        try
-        {
-            // Parse the search text as a number using the locale
-            DecimalFormatSymbols symbols = new DecimalFormatSymbols(locale);
-            DecimalFormat formatter = new DecimalFormat("#,##0.###", symbols);
-            formatter.setParseBigDecimal(false);
-
-            // Try to parse the search text
-            Number searchNumber;
-            try
-            {
-                searchNumber = formatter.parse(searchText);
-            }
-            catch (ParseException e)
-            {
-                // If it's not a valid number in this locale, no match
-                return false;
-            }
-
-            // Check if the search text contains a decimal separator
-            boolean hasExplicitDecimal = searchText.contains(String.valueOf(symbols.getDecimalSeparator()));
-
-            // Get string representations for comparison
-            String valueStr = formatter.format(value);
-            String searchStr = formatter.format(searchNumber.doubleValue());
-
-            // If search text has explicit decimal, do exact decimal
-            // place matching
-            if (hasExplicitDecimal)
-            {
-                // Count decimal places in search text
-                int decimalPlaces = countDecimalPlaces(searchText, symbols.getDecimalSeparator());
-
-                // Create a formatter with exactly that many decimal
-                // places
-                DecimalFormat exactFormatter = new DecimalFormat("#,##0." + "#".repeat(decimalPlaces), symbols);
-
-                // Format both numbers with exact decimal places
-                String exactValueStr = exactFormatter.format(value);
-                String exactSearchStr = exactFormatter.format(searchNumber.doubleValue());
-
-                // Must be exact match with these decimal places
-                return exactValueStr.equals(exactSearchStr);
-            }
-            else
-            {
-                // For substring matching (without explicit decimal)
-                // Remove all group separators for clean comparison
-                String cleanValueStr = valueStr.replace(String.valueOf(symbols.getGroupingSeparator()), "");
-                String cleanSearchStr = searchStr.replace(String.valueOf(symbols.getGroupingSeparator()), "");
-
-                // Substring match
-                return cleanValueStr.contains(cleanSearchStr);
-            }
-        }
-        catch (Exception e)
-        {
-            // For any other exception, assume no match
+        if (searchText == null || searchText.isEmpty())
             return false;
+            
+        // Get locale-specific decimal and grouping separators
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.getDefault());
+        char decimalSeparator = symbols.getDecimalSeparator();
+        char groupingSeparator = symbols.getGroupingSeparator();
+        
+        // Remove grouping separators from search text
+        String normalizedSearchText = searchText.replace(String.valueOf(groupingSeparator), "");
+        
+        // Check if the search text contains only valid numeric characters
+        for (int i = 0; i < normalizedSearchText.length(); i++)
+        {
+            char c = normalizedSearchText.charAt(i);
+            if (!Character.isDigit(c) && c != decimalSeparator && c != '-')
+                return false;
         }
+        
+        // Handle negative numbers
+        boolean searchIsNegative = normalizedSearchText.startsWith("-");
+        boolean valueIsNegative = value < 0;
+        
+        // If signs don't match, return false
+        if (searchIsNegative != valueIsNegative)
+            return false;
+        
+        // Remove negative sign for further processing
+        if (searchIsNegative)
+            normalizedSearchText = normalizedSearchText.substring(1);
+        
+        // Convert value to string representation using locale-specific formatting
+        DecimalFormat df = new DecimalFormat("#.#########", symbols);
+        String valueStr = df.format(Math.abs(value));
+        
+        // Split into whole and decimal parts
+        String[] searchParts = normalizedSearchText.split("\\" + decimalSeparator, -1);
+        String[] valueParts = valueStr.split("\\" + decimalSeparator, -1);
+        
+        // Check whole number part
+        if (!valueParts[0].startsWith(searchParts[0]))
+            return false;
+        
+        // If search text has no decimal part, it's a match
+        if (searchParts.length == 1)
+            return true;
+        
+        // If search text has decimal separator but no digits after it, it's a match
+        if (searchParts.length > 1 && searchParts[1].isEmpty())
+            return true;
+        
+        // If value has no decimal part but search text does
+        if (valueParts.length == 1)
+        {
+            // Only match if search decimal part consists only of zeros
+            return searchParts[1].matches("0*");
+        }
+        
+        // Check decimal part - the search decimal part should be a prefix of the value decimal part
+        // or the value decimal part should be a prefix of the search decimal part with remaining digits being zeros
+        String searchDecimal = searchParts[1];
+        String valueDecimal = valueParts[1];
+        
+        if (valueDecimal.startsWith(searchDecimal))
+            return true;
+        
+        if (searchDecimal.length() > valueDecimal.length())
+        {
+            // Check if search text has more decimal places than the value
+            // The extra digits must all be zeros
+            String searchPrefix = searchDecimal.substring(0, valueDecimal.length());
+            String searchSuffix = searchDecimal.substring(valueDecimal.length());
+            
+            return valueDecimal.equals(searchPrefix) && searchSuffix.matches("0*");
+        }
+        
+        return false;
     }
 
     public static int countDecimalPlaces(String number, char decimalSeparator)
