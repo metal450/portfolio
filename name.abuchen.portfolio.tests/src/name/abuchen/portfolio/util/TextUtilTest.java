@@ -262,6 +262,7 @@ public class TextUtilTest
         assertFalse(TextUtil.isNumericMatch("", 12));
         assertFalse(TextUtil.isNumericMatch("abc", 12));
         assertFalse(TextUtil.isNumericMatch("12a", 12));
+        assertFalse(TextUtil.isNumericMatch("25.", 2500));
         assertFalse(TextUtil.isNumericMatch("25.0", 2500));
         assertFalse(TextUtil.isNumericMatch("25.33", 254.33));
 
