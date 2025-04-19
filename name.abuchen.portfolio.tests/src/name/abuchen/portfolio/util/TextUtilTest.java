@@ -256,6 +256,7 @@ public class TextUtilTest
         assertTrue(TextUtil.isNumericMatch("0" + decimalSep, 0.01));
         assertTrue(TextUtil.isNumericMatch("0" + decimalSep + "0", 0.01));
         assertTrue(TextUtil.isNumericMatch("0" + decimalSep + "01", 0.01));
+        assertFalse(TextUtil.isNumericMatch("0" + decimalSep + "012", 0.01));
         assertFalse(TextUtil.isNumericMatch("0", 1));
 
         assertFalse(TextUtil.isNumericMatch("", 12));
