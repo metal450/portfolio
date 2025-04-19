@@ -402,7 +402,6 @@ public final class TextUtil
         String[] searchParts = searchHasDecimal
                         ? cleanedSearchText.split(Pattern.quote(String.valueOf(decimalSeparator)), 2)
                         : new String[] { cleanedSearchText };
-
         String[] valueParts = valueHasDecimal ? formattedValue.split(Pattern.quote(String.valueOf(decimalSeparator)), 2)
                         : new String[] { formattedValue };
 
@@ -416,23 +415,19 @@ public final class TextUtil
         if (!valueWholePart.startsWith(searchWholePart))
             return false;
 
-        // Handle case: assertFalse(TextUtil.isNumericMatch("25.0", 2500));
         // If search has decimal but whole parts have different lengths (e.g.,
         // "25.0" vs "2500")
         if (searchHasDecimal && searchWholePart.length() != valueWholePart.length())
             return false;
 
-        // If search doesn't have a decimal part, it's a match (whole part
-        // prefix matched)
+        // If search doesn't have a decimal part, it's a match
         if (!searchHasDecimal)
             return true;
 
-        // If search has decimal but value doesn't
+        // If search has decimal but value doesn't,
+        // Only match if search decimal part is all zeros
         if (searchHasDecimal && !valueHasDecimal)
-        {
-            // Only match if search decimal part is all zeros
             return searchDecimalPart.isEmpty() || searchDecimalPart.matches("0+");
-        }
 
         // Both have decimal parts, check if search decimal part is a prefix of
         // value decimal part
