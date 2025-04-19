@@ -252,10 +252,10 @@ public class TextUtilTest
         assertFalse(TextUtil.isNumericMatch("25", 1250));
 
         assertTrue(TextUtil.isNumericMatch("0", 0));
+        assertTrue(TextUtil.isNumericMatch("0", 0.01));
+        assertTrue(TextUtil.isNumericMatch("0" + decimalSep + "0", 0.01));
+        assertTrue(TextUtil.isNumericMatch("0" + decimalSep + "01", 0.01));
         assertFalse(TextUtil.isNumericMatch("0", 1));
-        assertTrue(TextUtil.isNumericMatch("0", 0.01)); // Substring
-        assertTrue(TextUtil.isNumericMatch("0" + decimalSep + "001", 0.001));
-        assertTrue(TextUtil.isNumericMatch("0" + decimalSep + "0", 0.0));
 
         assertFalse(TextUtil.isNumericMatch("", 12));
         assertFalse(TextUtil.isNumericMatch("abc", 12));
