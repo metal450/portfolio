@@ -221,11 +221,11 @@ public class TextUtilTest
         assertFalse(TextUtil.isNumericMatch("26010", 2601));
 
         // Substring of whole number with separators
-        assertTrue(TextUtil.isNumericMatch("2"+ groupSep +"6", 2601));
-        assertTrue(TextUtil.isNumericMatch("2"+ groupSep +"60", 2601));
-        assertTrue(TextUtil.isNumericMatch("2"+ groupSep +"601", 2601));
-        assertFalse(TextUtil.isNumericMatch("2"+ groupSep +"6010", 2601));
-        assertTrue(TextUtil.isNumericMatch("2"+ groupSep +"601" + decimalSep, 2601));
+        assertTrue(TextUtil.isNumericMatch("2" + groupSep + "6", 2601));
+        assertTrue(TextUtil.isNumericMatch("2" + groupSep + "60", 2601));
+        assertTrue(TextUtil.isNumericMatch("2" + groupSep + "601", 2601));
+        assertFalse(TextUtil.isNumericMatch("2" + groupSep + "6010", 2601));
+        assertTrue(TextUtil.isNumericMatch("2" + groupSep + "601" + decimalSep, 2601));
 
         // Substring of decimal
         assertTrue(TextUtil.isNumericMatch("2", 2601.26));
@@ -244,13 +244,13 @@ public class TextUtilTest
         assertFalse(TextUtil.isNumericMatch("2601" + decimalSep + "01", 2601));
 
         // Substring of decimal with separators
-        assertTrue(TextUtil.isNumericMatch("2"+ groupSep +"6", 2601.26));
-        assertTrue(TextUtil.isNumericMatch("2"+ groupSep +"60", 2601.26));
-        assertTrue(TextUtil.isNumericMatch("2"+ groupSep +"601", 2601.26));
-        assertTrue(TextUtil.isNumericMatch("2"+ groupSep +"601" + decimalSep, 2601.26));
-        assertTrue(TextUtil.isNumericMatch("2"+ groupSep +"601" + decimalSep + "2", 2601.26));
-        assertTrue(TextUtil.isNumericMatch("2"+ groupSep +"601" + decimalSep + "26", 2601.26));
-        assertFalse(TextUtil.isNumericMatch("2"+ groupSep +"601" + decimalSep + "261", 2601.26));
+        assertTrue(TextUtil.isNumericMatch("2" + groupSep + "6", 2601.26));
+        assertTrue(TextUtil.isNumericMatch("2" + groupSep + "60", 2601.26));
+        assertTrue(TextUtil.isNumericMatch("2" + groupSep + "601", 2601.26));
+        assertTrue(TextUtil.isNumericMatch("2" + groupSep + "601" + decimalSep, 2601.26));
+        assertTrue(TextUtil.isNumericMatch("2" + groupSep + "601" + decimalSep + "2", 2601.26));
+        assertTrue(TextUtil.isNumericMatch("2" + groupSep + "601" + decimalSep + "26", 2601.26));
+        assertFalse(TextUtil.isNumericMatch("2" + groupSep + "601" + decimalSep + "261", 2601.26));
 
         // Substring in wrong position
         assertFalse(TextUtil.isNumericMatch("25", 1250));
@@ -273,9 +273,10 @@ public class TextUtilTest
         assertTrue(TextUtil.isNumericMatch("25", 250));
         assertFalse(TextUtil.isNumericMatch("25.0", 2500));
         assertFalse(TextUtil.isNumericMatch("25.33", 254.33));
-        
+
         // Note: Because PP doesn't display numbers with minus signs
-        // (has different columns for + and -, where both are displayed as positive)
+        // (has different columns for + and -, where both are displayed as
+        // positive)
         assertTrue(TextUtil.isNumericMatch("25", -25));
     }
 }

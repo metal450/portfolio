@@ -3,7 +3,6 @@ package name.abuchen.portfolio.util;
 import java.text.Collator;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.ParseException;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -364,93 +363,99 @@ public final class TextUtil
                         .replace("\"", "&quot;") //$NON-NLS-1$ //$NON-NLS-2$
                         .replace("'", "&#39;"); //$NON-NLS-1$ //$NON-NLS-2$ Ï
     }
-    
- 
+
     /**
-     * Determines if a search text matches a numeric value.
-     * Supports partial matches (prefixes), locale-specific formatting, and handles both
-     * positive and negative numbers regardless of search sign (as they're displayed in different columns).
+     * Determines if a search text matches a numeric value. Supports partial
+     * matches (prefixes), locale-specific formatting, and handles both positive
+     * and negative numbers regardless of search sign (as they're displayed in
+     * different columns).
      * 
-     * @param searchText The text to search for
-     * @param value The numeric value to match against
+     * @param searchText
+     *            The text to search for
+     * @param value
+     *            The numeric value to match against
      * @return true if the search text matches the value, false otherwise
      */
-    public static boolean isNumericMatch(String searchText, double value) {
+    public static boolean isNumericMatch(String searchText, double value)
+    {
         // Handle empty or null search text
-        if (searchText == null || searchText.isEmpty()) {
-            return false;
-        }
-        
+        if (searchText == null || searchText.isEmpty())
+        { return false; }
+
         // Get locale-specific decimal and grouping separators
         char decimalSeparator = new DecimalFormatSymbols(Locale.getDefault()).getDecimalSeparator();
         char groupingSeparator = new DecimalFormatSymbols(Locale.getDefault()).getGroupingSeparator();
-        
+
         // Remove grouping separators from search text
         String cleanedSearchText = searchText.replace(String.valueOf(groupingSeparator), "");
-        
+
         // Check if the search text is a valid number format
-        if (!isValidNumberFormat(cleanedSearchText, decimalSeparator)) {
-            return false;
-        }
-        
-        // Format the value to a string using the current locale (using absolute value)
+        if (!isValidNumberFormat(cleanedSearchText, decimalSeparator))
+        { return false; }
+
+        // Format the value to a string using the current locale (using absolute
+        // value)
         DecimalFormat df = new DecimalFormat("#.###");
         df.setGroupingUsed(false); // Disable grouping
-        String formattedValue = df.format(Math.abs(value)); // Always use absolute value for comparison
-        
+        String formattedValue = df.format(Math.abs(value)); // Always use
+                                                            // absolute value
+                                                            // for comparison
+
         // Remove any negative sign from search text for comparison
-        if (cleanedSearchText.startsWith("-")) {
+        if (cleanedSearchText.startsWith("-"))
+        {
             cleanedSearchText = cleanedSearchText.substring(1);
         }
-        
+
         // Split both strings into whole and decimal parts
         boolean searchHasDecimal = cleanedSearchText.contains(String.valueOf(decimalSeparator));
         boolean valueHasDecimal = formattedValue.contains(String.valueOf(decimalSeparator));
-        
-        String[] searchParts = searchHasDecimal ? 
-            cleanedSearchText.split(Pattern.quote(String.valueOf(decimalSeparator)), 2) : 
-            new String[] { cleanedSearchText };
-        
-        String[] valueParts = valueHasDecimal ? 
-            formattedValue.split(Pattern.quote(String.valueOf(decimalSeparator)), 2) : 
-            new String[] { formattedValue };
-        
+
+        String[] searchParts = searchHasDecimal
+                        ? cleanedSearchText.split(Pattern.quote(String.valueOf(decimalSeparator)), 2)
+                        : new String[] { cleanedSearchText };
+
+        String[] valueParts = valueHasDecimal ? formattedValue.split(Pattern.quote(String.valueOf(decimalSeparator)), 2)
+                        : new String[] { formattedValue };
+
         String searchWholePart = searchParts[0];
         String searchDecimalPart = searchParts.length > 1 ? searchParts[1] : "";
-        
+
         String valueWholePart = valueParts[0];
         String valueDecimalPart = valueParts.length > 1 ? valueParts[1] : "";
-        
+
         // The whole part must be a prefix match
-        if (!valueWholePart.startsWith(searchWholePart)) {
-            return false;
-        }
-        
+        if (!valueWholePart.startsWith(searchWholePart))
+        { return false; }
+
         // Handle case: assertFalse(TextUtil.isNumericMatch("25.0", 2500));
-        // If search has decimal but whole parts have different lengths (e.g., "25.0" vs "2500")
-        if (searchHasDecimal && searchWholePart.length() != valueWholePart.length()) {
-            return false;
-        }
-        
-        // If search doesn't have a decimal part, it's a match (whole part prefix matched)
-        if (!searchHasDecimal) {
-            return true;
-        }
-        
+        // If search has decimal but whole parts have different lengths (e.g.,
+        // "25.0" vs "2500")
+        if (searchHasDecimal && searchWholePart.length() != valueWholePart.length())
+        { return false; }
+
+        // If search doesn't have a decimal part, it's a match (whole part
+        // prefix matched)
+        if (!searchHasDecimal)
+        { return true; }
+
         // If search has decimal but value doesn't
-        if (searchHasDecimal && !valueHasDecimal) {
+        if (searchHasDecimal && !valueHasDecimal)
+        {
             // Only match if search decimal part is all zeros
             return searchDecimalPart.isEmpty() || searchDecimalPart.matches("0+");
         }
-        
-        // Both have decimal parts, check if search decimal part is a prefix of value decimal part
+
+        // Both have decimal parts, check if search decimal part is a prefix of
+        // value decimal part
         return valueDecimalPart.startsWith(searchDecimalPart);
     }
 
     /**
      * Checks if the text has a valid number format.
      */
-    private static boolean isValidNumberFormat(String text, char decimalSeparator) {
+    private static boolean isValidNumberFormat(String text, char decimalSeparator)
+    {
         String decimalSep = Pattern.quote(String.valueOf(decimalSeparator));
         String pattern = "^-?\\d*(" + decimalSep + "\\d*)?$";
         return text.matches(pattern);
