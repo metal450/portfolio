@@ -1,7 +1,9 @@
 package name.abuchen.portfolio.util;
 
 import java.text.Collator;
+import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.ParseException;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -361,5 +363,87 @@ public final class TextUtil
                         .replace(">", "&gt;") //$NON-NLS-1$ //$NON-NLS-2$
                         .replace("\"", "&quot;") //$NON-NLS-1$ //$NON-NLS-2$
                         .replace("'", "&#39;"); //$NON-NLS-1$ //$NON-NLS-2$ Ï
+    }
+    
+    /**
+     * Determines if the user-entered searchText matches the value,
+     * where: It should match substring (i.e. "25" should match "2500")
+     * If the user explicitly types i.e. "25.0", it should NOT match
+     * "25" If the user types i.e. "2,500", it should match "2500" It
+     * must be locale-safe (decimal separators/delimiters are based on
+     * locale)
+     */
+    public static boolean isNumericMatch(String searchText, double value)
+    {
+        Locale locale = Locale.getDefault();
+
+        try
+        {
+            // Parse the search text as a number using the locale
+            DecimalFormatSymbols symbols = new DecimalFormatSymbols(locale);
+            DecimalFormat formatter = new DecimalFormat("#,##0.###", symbols);
+            formatter.setParseBigDecimal(false);
+
+            // Try to parse the search text
+            Number searchNumber;
+            try
+            {
+                searchNumber = formatter.parse(searchText);
+            }
+            catch (ParseException e)
+            {
+                // If it's not a valid number in this locale, no match
+                return false;
+            }
+
+            // Check if the search text contains a decimal separator
+            boolean hasExplicitDecimal = searchText.contains(String.valueOf(symbols.getDecimalSeparator()));
+
+            // Get string representations for comparison
+            String valueStr = formatter.format(value);
+            String searchStr = formatter.format(searchNumber.doubleValue());
+
+            // If search text has explicit decimal, do exact decimal
+            // place matching
+            if (hasExplicitDecimal)
+            {
+                // Count decimal places in search text
+                int decimalPlaces = countDecimalPlaces(searchText, symbols.getDecimalSeparator());
+
+                // Create a formatter with exactly that many decimal
+                // places
+                DecimalFormat exactFormatter = new DecimalFormat("#,##0." + "#".repeat(decimalPlaces), symbols);
+
+                // Format both numbers with exact decimal places
+                String exactValueStr = exactFormatter.format(value);
+                String exactSearchStr = exactFormatter.format(searchNumber.doubleValue());
+
+                // Must be exact match with these decimal places
+                return exactValueStr.equals(exactSearchStr);
+            }
+            else
+            {
+                // For substring matching (without explicit decimal)
+                // Remove all group separators for clean comparison
+                String cleanValueStr = valueStr.replace(String.valueOf(symbols.getGroupingSeparator()), "");
+                String cleanSearchStr = searchStr.replace(String.valueOf(symbols.getGroupingSeparator()), "");
+
+                // Substring match
+                return cleanValueStr.contains(cleanSearchStr);
+            }
+        }
+        catch (Exception e)
+        {
+            // For any other exception, assume no match
+            return false;
+        }
+    }
+
+    public static int countDecimalPlaces(String number, char decimalSeparator)
+    {
+        int index = number.indexOf(decimalSeparator);
+        if (index < 0)
+            return 0;
+        return number.length() - index - 1;
     }
 }

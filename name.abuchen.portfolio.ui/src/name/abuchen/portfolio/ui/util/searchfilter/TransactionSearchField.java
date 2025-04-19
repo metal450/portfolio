@@ -1,9 +1,11 @@
 package name.abuchen.portfolio.ui.util.searchfilter;
 
-import java.math.BigDecimal;
-import java.text.NumberFormat;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -21,6 +23,7 @@ import name.abuchen.portfolio.model.Security;
 import name.abuchen.portfolio.model.TransactionPair;
 import name.abuchen.portfolio.money.Money;
 import name.abuchen.portfolio.ui.Messages;
+import name.abuchen.portfolio.util.TextUtil;
 
 public class TransactionSearchField extends ControlContribution
 {
@@ -102,16 +105,15 @@ public class TransactionSearchField extends ControlContribution
                 for (Function<TransactionPair<?>, Object> label : searchLabels)
                 {
                     Object l = label.apply(tx);
-                    if (l == null)
-                        continue;
 
-                    // If the search text is a number and we're looking at a
-                    // numeric field, do a numeric comparison to handle
-                    // formatting differences (commas, periods, etc.)
-                    Double numericSearch = tryParseAsNumber(filterText);
-                    if (numericSearch != null && (l instanceof Money || l instanceof Number))
+                    if (l != null && l.toString().toLowerCase().indexOf(filterText) >= 0)
+                        return true;
+
+                    // If we didn't match by substring and this is a numeric
+                    // field, do a numeric comparison to handle formatting
+                    // differences (commas, periods, etc.)
+                    if (l instanceof Money || l instanceof Number)
                     {
-                        // Extract the numeric value based on the field type
                         double fieldValue;
                         if (l instanceof Money)
                             fieldValue = ((Money) l).getAmount() / 100.0;
@@ -120,29 +122,9 @@ public class TransactionSearchField extends ControlContribution
                         else
                             fieldValue = ((Number) l).doubleValue();
 
-                        // Check for exact match
-                        if (Math.abs(fieldValue - numericSearch) < 0.0001)
-                            return true;
-
-                        // For substring matching, convert both to a canonical
-                        // string representation using BigDecimal to avoid
-                        // locale-specific formatting (BigDecimal always
-                        // uses period as the decimal separator)
-                        String fieldStr = BigDecimal.valueOf(fieldValue).toPlainString();
-                        String searchStr = BigDecimal.valueOf(numericSearch).toPlainString();
-
-                        // Remove trailing ".0" in case of whole numbers (so
-                        // i.e. searching "25" won't get stringified to "25.0"
-                        // and not match 25.xx as substring)
-                        searchStr = searchStr.replace(".0", "");
-
-                        if (fieldStr.contains(searchStr))
+                        if (TextUtil.isNumericMatch(filterText, fieldValue))
                             return true;
                     }
-
-                    // Otherwise use string-based search
-                    else if (l.toString().toLowerCase().indexOf(filterText) >= 0)
-                        return true;
                 }
 
                 return false;
@@ -150,19 +132,4 @@ public class TransactionSearchField extends ControlContribution
         };
     }
 
-    /**
-     * Try to parse the search text as a number using locale-aware parsing.
-     * Returns null if the text cannot be parsed as a number.
-     */
-    private Double tryParseAsNumber(String text)
-    {
-        try
-        {
-            return NumberFormat.getInstance().parse(text).doubleValue();
-        }
-        catch (java.text.ParseException e)
-        {
-            return null;
-        }
-    }
 }
