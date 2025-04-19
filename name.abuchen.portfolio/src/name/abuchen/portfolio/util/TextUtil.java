@@ -371,9 +371,8 @@ public final class TextUtil
      */
     public static boolean isNumericSearchMatch(String searchText, double value)
     {
-        // Handle empty or null search text
         if (searchText == null || searchText.isEmpty())
-        { return false; }
+            return false;
 
         // Get locale-specific decimal and grouping separators
         char decimalSeparator = new DecimalFormatSymbols(Locale.getDefault()).getDecimalSeparator();
@@ -384,7 +383,7 @@ public final class TextUtil
 
         // Check if the search text is a valid number format
         if (!isValidNumberFormat(cleanedSearchText, decimalSeparator))
-        { return false; }
+            return false;
 
         // Format the value to a string using the current locale (using absolute
         // value)
@@ -419,18 +418,18 @@ public final class TextUtil
 
         // The whole part must be a prefix match
         if (!valueWholePart.startsWith(searchWholePart))
-        { return false; }
+            return false;
 
         // Handle case: assertFalse(TextUtil.isNumericMatch("25.0", 2500));
         // If search has decimal but whole parts have different lengths (e.g.,
         // "25.0" vs "2500")
         if (searchHasDecimal && searchWholePart.length() != valueWholePart.length())
-        { return false; }
+            return false;
 
         // If search doesn't have a decimal part, it's a match (whole part
         // prefix matched)
         if (!searchHasDecimal)
-        { return true; }
+            return true;
 
         // If search has decimal but value doesn't
         if (searchHasDecimal && !valueHasDecimal)
