@@ -101,7 +101,6 @@ public class TransactionSearchField extends ControlContribution
                 for (Function<TransactionPair<?>, Object> label : searchLabels)
                 {
                     Object l = label.apply(tx);
-
                     if (l != null && l.toString().toLowerCase().indexOf(filterText) >= 0)
                         return true;
 
