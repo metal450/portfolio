@@ -273,6 +273,7 @@ public class TextUtilTest
         assertTrue(TextUtil.isNumericMatch("2" + groupSep + "500" + decimalSep + "0", -2500));
         assertTrue(TextUtil.isNumericMatch("25", 250));
         assertFalse(TextUtil.isNumericMatch("25.0", 2500));
+        assertFalse(TextUtil.isNumericMatch("25.33", 254.33))
         
         // Note: intentionally not checking for user-typed negative numbers
         // because PP doesn't display numbers with minus signs
