@@ -1,5 +1,7 @@
 package name.abuchen.portfolio.ui.util.searchfilter;
 
+import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -103,14 +105,13 @@ public class TransactionSearchField extends ControlContribution
                     if (l == null)
                         continue;
 
-                    // If we the searched text is purely numeric, and we're
-                    // looking at a numeric field,
-                    // compare by value rather than by string. This ensures that
-                    // results will be turned
-                    // regardless of searching by i.e. "1,000" or "1000"
+                    // If the search text is a number and we're looking at a
+                    // numeric field, do a numeric comparison to handle
+                    // formatting differences (commas, periods, etc.)
                     Double numericSearch = tryParseAsNumber(filterText);
                     if (numericSearch != null && (l instanceof Money || l instanceof Number))
                     {
+                        // Extract the numeric value based on the field type
                         double fieldValue;
                         if (l instanceof Money)
                             fieldValue = ((Money) l).getAmount() / 100.0;
@@ -119,12 +120,27 @@ public class TransactionSearchField extends ControlContribution
                         else
                             fieldValue = ((Number) l).doubleValue();
 
-                        String fieldValueStr = String.valueOf(fieldValue).replace(".0", "");
-                        String searchValueStr = String.valueOf(numericSearch).replace(".0", "");
-                        if (fieldValueStr.contains(searchValueStr))
+                        // Check for exact match
+                        if (Math.abs(fieldValue - numericSearch) < 0.0001)
+                            return true;
+
+                        // For substring matching, convert both to a canonical
+                        // string representation using BigDecimal to avoid
+                        // locale-specific formatting (BigDecimal always
+                        // uses period as the decimal separator)
+                        String fieldStr = BigDecimal.valueOf(fieldValue).toPlainString();
+                        String searchStr = BigDecimal.valueOf(numericSearch).toPlainString();
+
+                        // Remove trailing ".0" in case of whole numbers (so
+                        // i.e. searching "25" won't get stringified to "25.0"
+                        // and not match 25.xx as substring)
+                        searchStr = searchStr.replace(".0", "");
+
+                        if (fieldStr.contains(searchStr))
                             return true;
                     }
-                    // Otherwise use string-based search (existing behavior)
+
+                    // Otherwise use string-based search
                     else if (l.toString().toLowerCase().indexOf(filterText) >= 0)
                         return true;
                 }
@@ -135,17 +151,16 @@ public class TransactionSearchField extends ControlContribution
     }
 
     /**
-     * Try to parse the search text as a number, removing commas and other
-     * formatting characters. Returns null if the text isn't a number.
+     * Try to parse the search text as a number using locale-aware parsing.
+     * Returns null if the text cannot be parsed as a number.
      */
     private Double tryParseAsNumber(String text)
     {
         try
         {
-            String cleaned = text.replace(",", "").replace(" ", "");
-            return Double.parseDouble(cleaned);
+            return NumberFormat.getInstance().parse(text).doubleValue();
         }
-        catch (NumberFormatException e)
+        catch (java.text.ParseException e)
         {
             return null;
         }
