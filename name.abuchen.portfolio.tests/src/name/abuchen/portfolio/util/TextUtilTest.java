@@ -266,16 +266,16 @@ public class TextUtilTest
         assertFalse(TextUtil.isNumericMatch("", 12));
         assertFalse(TextUtil.isNumericMatch("abc", 12));
         assertFalse(TextUtil.isNumericMatch("12a", 12));
-        assertTrue(TextUtil.isNumericMatch("25", -25));
         assertTrue(TextUtil.isNumericMatch("25" + decimalSep + "0", -25));
         assertTrue(TextUtil.isNumericMatch("25" + decimalSep + "5", -25.5));
         assertTrue(TextUtil.isNumericMatch("25" + decimalSep + "5", -25.55));
         assertTrue(TextUtil.isNumericMatch("2" + groupSep + "500" + decimalSep + "0", -2500));
         assertTrue(TextUtil.isNumericMatch("25", 250));
         assertFalse(TextUtil.isNumericMatch("25.0", 2500));
-        assertFalse(TextUtil.isNumericMatch("25.33", 254.33))
+        assertFalse(TextUtil.isNumericMatch("25.33", 254.33));
         
-        // Note: intentionally not checking for user-typed negative numbers
-        // because PP doesn't display numbers with minus signs
+        // Note: Because PP doesn't display numbers with minus signs
+        // (has different columns for + and -, where both are displayed as positive)
+        assertTrue(TextUtil.isNumericMatch("25", -25));
     }
 }
