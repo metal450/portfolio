@@ -235,12 +235,6 @@ public class TextUtilTest
         assertTrue(TextUtil.isNumericMatch("2601" + decimalSep + "26", 2601.26));
         assertFalse(TextUtil.isNumericMatch("2601" + decimalSep + "261", 2601.26));
 
-        assertTrue(TextUtil.isNumericMatch("2601" + decimalSep, 2601));
-        assertTrue(TextUtil.isNumericMatch("2601" + decimalSep + "0", 2601));
-        assertTrue(TextUtil.isNumericMatch("2601" + decimalSep + "00", 2601));
-        assertFalse(TextUtil.isNumericMatch("2601" + decimalSep + "01", 2601));
-        assertTrue(TextUtil.isNumericMatch("2" + groupSep + "601" + decimalSep, 2601));
-
         assertTrue(TextUtil.isNumericMatch("2" + groupSep + "6", 2601.26));
         assertTrue(TextUtil.isNumericMatch("2" + groupSep + "60", 2601.26));
         assertTrue(TextUtil.isNumericMatch("2" + groupSep + "601", 2601.26));
@@ -248,6 +242,12 @@ public class TextUtilTest
         assertTrue(TextUtil.isNumericMatch("2" + groupSep + "601" + decimalSep + "2", 2601.26));
         assertTrue(TextUtil.isNumericMatch("2" + groupSep + "601" + decimalSep + "26", 2601.26));
         assertFalse(TextUtil.isNumericMatch("2" + groupSep + "601" + decimalSep + "261", 2601.26));
+        
+        assertTrue(TextUtil.isNumericMatch("2601" + decimalSep, 2601));
+        assertTrue(TextUtil.isNumericMatch("2601" + decimalSep + "0", 2601));
+        assertTrue(TextUtil.isNumericMatch("2601" + decimalSep + "00", 2601));
+        assertFalse(TextUtil.isNumericMatch("2601" + decimalSep + "01", 2601));
+        assertTrue(TextUtil.isNumericMatch("2" + groupSep + "601" + decimalSep, 2601));
 
         assertFalse(TextUtil.isNumericMatch("25", 1250));
 
