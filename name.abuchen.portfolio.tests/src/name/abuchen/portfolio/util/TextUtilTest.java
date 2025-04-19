@@ -273,5 +273,6 @@ public class TextUtilTest
         assertTrue(TextUtil.isNumericMatch("-2" + groupSep + "500" + decimalSep + "0", -2500));
         assertTrue(TextUtil.isNumericMatch("-25", -250));
         assertFalse(TextUtil.isNumericMatch("-25", 25)); // Sign matters
+        assertFalse(TextUtil.isNumericMatch("25.0", 2500));
     }
 }
