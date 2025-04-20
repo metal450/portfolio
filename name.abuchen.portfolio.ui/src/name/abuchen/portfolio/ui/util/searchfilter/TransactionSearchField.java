@@ -122,10 +122,11 @@ public class TransactionSearchField extends ControlContribution
                         else
                             fieldValue = ((Number) l).doubleValue();
 
-                        return TextUtil.isNumericSearchMatch(filterText, fieldValue);
+                        if (TextUtil.isNumericSearchMatch(filterText, fieldValue))
+                            return true;
                     }
 
-                    if (l.toString().toLowerCase().indexOf(filterText) >= 0)
+                    else if (l.toString().toLowerCase().indexOf(filterText) >= 0)
                         return true;
                 }
 
