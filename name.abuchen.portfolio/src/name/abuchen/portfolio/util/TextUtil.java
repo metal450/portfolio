@@ -426,6 +426,7 @@ public final class TextUtil
 
         // If search has decimal but value doesn't,
         // Only match if search decimal part is all zeros
+        // Handles i.e. "2601.0" matches value 2601
         if (searchHasDecimal && !valueHasDecimal)
             return searchDecimalPart.isEmpty() || searchDecimalPart.matches("0+");
 
