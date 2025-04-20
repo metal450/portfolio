@@ -267,6 +267,7 @@ public class TextUtilTest
         assertFalse(TextUtil.isNumericSearchMatch("25.33", 254.33));
         assertFalse(TextUtil.isNumericSearchMatch("250000", 2500));
         assertTrue(TextUtil.isNumericSearchMatch("12", 128));
+        assertTrue(TextUtil.isNumericSearchMatch("128" + decimalSep, 128));
 
         // We don't care about sign because PP displays both positive and
         // negative numbers as positive
