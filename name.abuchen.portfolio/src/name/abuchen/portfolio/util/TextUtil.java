@@ -435,9 +435,6 @@ public final class TextUtil
         return valueDecimalPart.startsWith(searchDecimalPart);
     }
 
-    /**
-     * Checks if the text has a valid number format.
-     */
     private static boolean isValidNumberFormat(String text, char decimalSeparator)
     {
         String decimalSep = Pattern.quote(String.valueOf(decimalSeparator));
