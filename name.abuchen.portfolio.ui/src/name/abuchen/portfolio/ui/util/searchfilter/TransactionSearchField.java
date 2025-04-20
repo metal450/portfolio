@@ -101,12 +101,11 @@ public class TransactionSearchField extends ControlContribution
                 for (Function<TransactionPair<?>, Object> label : searchLabels)
                 {
                     Object l = label.apply(tx);
-                    if (l != null && l.toString().toLowerCase().indexOf(filterText) >= 0)
-                        return true;
-
-                    // If we didn't match by substring and this is a numeric
-                    // field, do a numeric comparison to handle formatting
-                    // differences (commas, periods, etc.)
+                    if(l == null)
+                        continue;
+                    
+                    // If this is a numeric field, do a numeric comparison 
+                    // to handle formatting differences (commas, periods, etc.)
                     if (l instanceof Money || l instanceof Number)
                     {
                         double fieldValue;
@@ -117,9 +116,11 @@ public class TransactionSearchField extends ControlContribution
                         else
                             fieldValue = ((Number) l).doubleValue();
 
-                        if (TextUtil.isNumericSearchMatch(filterText, fieldValue))
-                            return true;
+                        return TextUtil.isNumericSearchMatch(filterText, fieldValue);
                     }
+                    
+                    if (l.toString().toLowerCase().indexOf(filterText) >= 0)
+                        return true;
                 }
 
                 return false;
